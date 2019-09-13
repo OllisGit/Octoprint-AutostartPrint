@@ -10,6 +10,7 @@ If you want to start a printjob after powering up your OctoPrintServer, make sur
 
 1. Make sure you check "Auto-connect on server startup" in NavigationBar
 2. Select what kind of file do you want to print from "local-" or "sd-card-filesystem" in the Plugin-Settings
+   (SD-Card not tested (right now), because I didn't have an SD-Card)
 3. Define a delay in seconds
 3. Activate the Plugin 
 
