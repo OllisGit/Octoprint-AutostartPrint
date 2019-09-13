@@ -1,0 +1,36 @@
+<form id="autostartPrint_plugin_settings" class="form-horizontal" >
+
+    <h3>AutostartPrint settings</h3>
+
+    <div class="control-group">
+        <div class="controls">
+            <label class="checkbox">
+                <input type="checkbox" data-bind="checked: pluginSettings.activated" > Activated
+            </label>
+        </div>
+    </div>
+
+    <div class="control-group" >
+        <label class="control-label">Startime delay:</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" step="any" min="0" class="input-mini text-right"
+                       data-bind="value: pluginSettings.startPrintDelay" >
+                <span class="add-on">seconds</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Selected file:</label>
+        <div class="controls">
+            <label class="radio">
+                <input type="radio" name="fileSelectionMode" value="sdcard" data-bind="checked: pluginSettings.fileSelectionMode"> &nbsp;&nbsp;last uploaded file from SD-Card
+            </label>
+            <label class="radio">
+                <input type="radio" name="fileSelectionMode" value="local" data-bind="checked: pluginSettings.fileSelectionMode"> &nbsp;&nbsp;last uploaded file from local filesystem
+            </label>
+        </div>
+    </div>
+
+</form>

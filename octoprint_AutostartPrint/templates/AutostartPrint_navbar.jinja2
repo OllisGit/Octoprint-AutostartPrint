@@ -1,0 +1,21 @@
+<div id="autostartPrint_plugin_navbar">
+    <p class="nav navbar-text" data-bind="visible: pluginSettings.activated"><font color="red">AUTOSTART PRINT ACTIVATED!</font></p>
+</div>
+
+<!-- Modal-Dialog -->
+<div id="navbar_countdownDialog" class="modal hide fade">
+    <div class="modal-header">
+        <h3 class="modal-title">Autostart of "<span id="selectedFilenameForCountdown"></span>"</h3>
+    </div>
+    <div class="modal-body">
+
+       <div class="contdownDialogContent">
+            <div id="countdownCircle" class="countdownCircle">
+                <strong></strong>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-danger btn-confirm">Cancel autostart print</button>
+    </div>
+</div>

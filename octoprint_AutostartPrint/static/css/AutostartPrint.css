@@ -1,1 +1,38 @@
-/* TODO: Have your plugin's CSS files generated to here. */
+.contdownDialogContent {
+    margin-left: 15%;
+}
+
+.countdownCircle {
+  width: 100px;
+  margin: 6px 6px 20px;
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.countdownCircle canvas {
+  vertical-align: top;
+}
+
+.countdownCircle strong {
+  position: absolute;
+  top: 90px;
+  left: 115px;
+  width: 100%;
+  text-align: center;
+  line-height: 40px;
+  font-size: 30px;
+}
+
+.countdownCircle strong i {
+  font-style: normal;
+  font-size: 0.6em;
+  font-weight: normal;
+}
+
+.countdownCircle span {
+  display: block;
+  color: #aaa;
+  margin-top: 12px;
+}
