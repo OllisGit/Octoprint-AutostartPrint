@@ -76,6 +76,8 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 		# should I really start the print
 		if startPrint:
 			self._printer.select_file(filePath, isSDDestination, True)
+			self._sendPopupMessageToClient("success", "AutostartPrint: Print started!",
+										   "File " +self.selectedFilename+ " selected and started")
 
 	######################################################################################### Hooks and public functions
 
@@ -180,7 +182,7 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 		# Define your plugin's asset files to automatically include in the
 		# core UI here.
 		return dict(
-			js=["js/circle-progress.js",
+			js=["js/circle-progress.min.js",
 				"js/AutostartPrint.js",
 				"js/ResetSettingsUtil.js"],
 			css=["css/AutostartPrint.css"],
