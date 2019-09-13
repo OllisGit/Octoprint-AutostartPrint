@@ -77,7 +77,7 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 		if startPrint:
 			self._printer.select_file(filePath, isSDDestination, True)
 			self._sendPopupMessageToClient("success", "AutostartPrint: Print started!",
-										   "File " +self.selectedFilename+ " selected and started")
+										   "File '" +self.selectedFilename+ "' selected and started")
 
 	######################################################################################### Hooks and public functions
 
