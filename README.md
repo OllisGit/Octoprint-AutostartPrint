@@ -6,12 +6,12 @@
 
 Plugin starts a print job after the Printer is connected (e.g. after powering up). It selects the lasted uploaded file for print.
 
-If you want to start a printjob after powering up your OctoPrintServer, make sure you do the folowing steps:
+If you want to start a printjob after powering up your OctoPrintServer, make sure you do the following steps:
 
-1. Make sure you check "Auto-connect on server startup" in NavigationBar
-2. Select what kind of file do you want to print from "local-" or "sd-card-filesystem" in the Plugin-Settings
+1. Make sure you check "Auto-connect on server startup" in Side-Bar
+2. Select what kind of file do you want to print: from "local-" or "sd-card-filesystem" in the Plugin-Settings
    (SD-Card not tested (right now), because I didn't have an SD-Card)
-3. Define a delay in seconds
+3. Define a delay in seconds before print starts
 3. Activate the Plugin 
 
 --> Next time the printer is connected a countdown is started and after that countdown the print starts automatically. 
@@ -23,7 +23,7 @@ If you want to start a printjob after powering up your OctoPrintServer, make sur
 
 ## Setup
 
-Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
+Install via the bundled [Plugin Manager](http://docs.octoprint.org/en/master/bundledplugins/pluginmanager.html)
 or manually using this URL:
 
     https://github.com/OllisGit/OctoPrint-AutostartPrint/releases/latest/download/master.zip
