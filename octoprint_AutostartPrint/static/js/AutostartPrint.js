@@ -85,6 +85,7 @@ $(function() {
         new ResetSettingsUtil().assignResetSettingsFeature(PLUGIN_ID, function(data){
                                 // assign default settings-values
                                 self.pluginSettings.activated(data.activated);
+                                self.pluginSettings.deactivateAfterSuccessful(data.deactivateAfterSuccessful);
                                 self.pluginSettings.startPrintDelay(data.startPrintDelay);
                                 self.pluginSettings.fileSelectionMode(data.fileSelectionMode);
         });
@@ -134,7 +135,10 @@ $(function() {
                     countdownCircle = null;
                 }
                 return;
+            }
 
+            if ("currentActivationState" == data.action){
+                self.pluginSettings.activated(data.activated);
             }
         }
     }

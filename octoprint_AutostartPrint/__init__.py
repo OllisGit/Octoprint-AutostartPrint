@@ -15,6 +15,7 @@ from threading import Thread
 ## GLOBAL KEYS
 
 SETTINGS_KEY_ACTIVATED = "activated"
+SETTINGS_KEY_DEACTIVATE_AFTER_SUCCESSFUL = "deactivateAfterSuccessful"
 SETTINGS_KEY_START_PRINT_DELAY = "startPrintDelay"
 SETTINGS_KEY_FILE_SELECTION_MODE = "fileSelectionMode"
 
@@ -48,9 +49,17 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 	def _sendCountdownTimeToClient(self, maxCountdownSeconds, currentCountdownSeconds):
 		self._plugin_manager.send_plugin_message(self._identifier,
 												 dict(action="upateCountdown",
-													  selectedFilename = self.selectedFilename,
+													  activated = self.selectedFilename,
 													  maxCountdownSeconds = maxCountdownSeconds,
 													  currentCountdownSeconds = currentCountdownSeconds))
+
+	def _sendCurrentActivationStateToClient(self):
+		self._plugin_manager.send_plugin_message(self._identifier,
+												 dict(action="currentActivationState",
+													  activated = self._settings.get_boolean([SETTINGS_KEY_ACTIVATED])
+													  )
+												 )
+
 
 
 	def _autostartPrintThreadFunction(self, fileName, filePath, isSDDestination):
@@ -139,6 +148,10 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 
 			self._logger.info("!!!CONNECTED-Event DONE")
 
+		if (Events.PRINT_DONE == event and self._settings.get_boolean([SETTINGS_KEY_DEACTIVATE_AFTER_SUCCESSFUL])):
+			self._settings.set_boolean([SETTINGS_KEY_ACTIVATED], False)
+			self._settings.save()
+			self._sendCurrentActivationStateToClient()
 
 	def on_settings_save(self, data):
 		# default save function
@@ -167,6 +180,7 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 		return dict(
 			# put your plugin's default settings here
 			activated = False,
+			deactivateAfterSuccessful = True,
 			startPrintDelay = 120,
 			fileSelectionMode = FILE_SELECTION_MODE_SDCARD
 		)
