@@ -43,7 +43,7 @@ labels:
     description: "Something isn't working"
     color: d73a4a
   - name: "type: enhancement"
-    description: "Something isn't working"
+    description: "New feature or request"
     color: a2eeef
   - name: "type: question"
     description: "Further information is requested"
