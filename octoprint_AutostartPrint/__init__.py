@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 import octoprint.plugin
 import octoprint.printer
-from octoprint.events import Events
+from octoprint.events import eventManager, Events
 import octoprint.filemanager
 from octoprint.filemanager.destinations import FileDestinations
 import flask
@@ -151,6 +151,7 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 		if (Events.PRINT_DONE == event and self._settings.get_boolean([SETTINGS_KEY_DEACTIVATE_AFTER_SUCCESSFUL])):
 			self._settings.set_boolean([SETTINGS_KEY_ACTIVATED], False)
 			self._settings.save()
+			# could also work eventManager().fire(Events.SETTINGS_UPDATED)
 			self._sendCurrentActivationStateToClient()
 
 	def on_settings_save(self, data):
@@ -174,6 +175,12 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 			if "stopCountdown" == action:
 				self.countdownRunning = False
 				return flask.jsonify(stopped=True)
+
+			if "activateAutostartPrint" == action:
+				isActivated = request.values["activated"] == "true"	# string compare because bool("false") doesn't work. bool("False") works
+				self._settings.set_boolean([SETTINGS_KEY_ACTIVATED], isActivated)
+				self._settings.save()
+				return flask.jsonify(activated=isActivated)
 
 	##~~ SettingsPlugin mixin
 	def get_settings_defaults(self):

@@ -79,6 +79,19 @@ $(function() {
         self.onBeforeBinding = function() {
             // assign current pluginSettings
             self.pluginSettings = self.settingsViewModel.settings.plugins[PLUGIN_ID];
+
+            self.onAutostartPrintActivated = function() {
+                var isActivated = self.pluginSettings.activated()
+                $.ajax({
+                    url: API_BASEURL + "plugin/"+PLUGIN_ID+"?action=activateAutostartPrint&activated="+isActivated,
+                    type: "GET"
+                    }).done(function( data ){
+                        //nothing to do...at the moment
+                    });
+            }
+            // assign event-listener
+            self.pluginSettings.activated.subscribe(self.onAutostartPrintActivated, self);
+
         }
 
        // enable support of resetSettings
@@ -89,6 +102,7 @@ $(function() {
                                 self.pluginSettings.startPrintDelay(data.startPrintDelay);
                                 self.pluginSettings.fileSelectionMode(data.fileSelectionMode);
         });
+
 
         self.countdownCircle = null;
         // receive data from server
@@ -157,6 +171,7 @@ $(function() {
         // Elements to bind to, e.g. #settings_plugin_AutostartPrint, #tab_plugin_AutostartPrint, ...
         elements: [
             document.getElementById("autostartPrint_plugin_navbar"),
+            document.getElementById("autostartPrint_plugin_sidebar"),
             document.getElementById("autostartPrint_plugin_settings")
         ]
     });
