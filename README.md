@@ -26,6 +26,7 @@ If you want to start a printjob after powering up your OctoPrintServer, make sur
 ## Screenshots
 ![plugin-settings](screenshots/plugin-settings.png "Plugin-Settings")
 ![countdown-dialog](screenshots/countdown-dialog.png "Countdown-Dialog")
+![autostart-sidebar](screenshots/autostart-sidebar.png "Autostart-Sidebar")
 
 
 ## Setup
