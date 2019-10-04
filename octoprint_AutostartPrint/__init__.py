@@ -49,7 +49,8 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 	def _sendCountdownTimeToClient(self, maxCountdownSeconds, currentCountdownSeconds):
 		self._plugin_manager.send_plugin_message(self._identifier,
 												 dict(action="upateCountdown",
-													  activated = self.selectedFilename,
+													  activated=self._settings.get_boolean([SETTINGS_KEY_ACTIVATED]),
+													  selectedFilename = self.selectedFilename,
 													  maxCountdownSeconds = maxCountdownSeconds,
 													  currentCountdownSeconds = currentCountdownSeconds))
 

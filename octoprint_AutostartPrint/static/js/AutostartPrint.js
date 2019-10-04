@@ -18,7 +18,6 @@ $(function() {
             if (countdownDialog != null && countdownDialog.is(":visible")){
                 return;
             }
-
             $("#selectedFilenameForCountdown").text(selectedFilename)
 
             countdownDialog = $(dialogId);
@@ -33,7 +32,8 @@ $(function() {
                 //minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
                 keyboard: false,
                 clickClose: false,
-                showClose: false
+                showClose: false,
+                backdrop: "static"
             }).css({
                 width: 'auto',
                 'margin-left': function() { return -($(this).width() /2); }
@@ -111,7 +111,6 @@ $(function() {
             if (plugin != PLUGIN_ID) {
                 return;
             }
-
             if (data.message_text){
                     new PNotify({
                         title: data.message_title,
@@ -122,7 +121,6 @@ $(function() {
             }
 
             if ("upateCountdown" == data.action){
-
                 selectedFilename = data.selectedFilename;
 
                 showDialog("#navbar_countdownDialog", function(dialog){
