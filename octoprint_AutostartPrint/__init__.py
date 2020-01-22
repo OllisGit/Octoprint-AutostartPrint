@@ -118,13 +118,13 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 				if selectedStorageDestination == currentDestination:
 					allFiles = latestFiles[currentDestination].items()
 					for currentFile in allFiles:
-						uploadTime = currentFile[1]["date"]
-						# check if file is a "machinecode file"
+						# check if file is a "machinecode file" and not a folder or image
 						currentFilePath = currentFile[1]["path"]
 						if not octoprint.filemanager.valid_file_type(currentFilePath, type="machinecode"):
 							self._logger.debug("File '" + currentFilePath + "' is not a machinecode file, not autoprinting")
 							continue
 
+						uploadTime = currentFile[1]["date"]
 						if uploadTime > lastUploadTime:
 							lastUploadTime = uploadTime
 							selectedFilePath = currentFilePath
