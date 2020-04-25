@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import octoprint.plugin
 import octoprint.printer
@@ -13,14 +13,20 @@ import time
 from threading import Thread
 
 ## GLOBAL KEYS
+from octoprint.util import comm
 
 SETTINGS_KEY_ACTIVATED = "activated"
 SETTINGS_KEY_DEACTIVATE_AFTER_SUCCESSFUL = "deactivateAfterSuccessful"
 SETTINGS_KEY_START_PRINT_DELAY = "startPrintDelay"
 SETTINGS_KEY_FILE_SELECTION_MODE = "fileSelectionMode"
+SETTINGS_KEY_START_TRIGGER_MODE = "startTriggerMode"
+
 
 FILE_SELECTION_MODE_SDCARD = FileDestinations.SDCARD
 FILE_SELECTION_MODE_FILESYSTEM = FileDestinations.LOCAL
+
+START_TRIGGER_MODE_CONNECTION = "connection"
+START_TRIGGER_MODE_OPERATIONAL = "operational"
 
 class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 						   octoprint.plugin.AssetPlugin,
@@ -89,6 +95,55 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 			self._sendPopupMessageToClient("success", "AutostartPrint: Print started!",
 										   "File '" +self.selectedFilename+ "' selected and started")
 
+
+
+	def _startAutoStart(self):
+		## start printing
+		self._logger.info("!!!CONNECTED-Event started")
+		# get latest file
+		# check if gcode file
+		# start countdown
+		# -- select
+		# -- print
+		selectedFilePath = None
+		selectedFileName = None
+		lastUploadTime = 0
+		latestFiles = self._file_manager.list_files()
+		selectedStorageDestination = self._settings.get([SETTINGS_KEY_FILE_SELECTION_MODE])
+		for currentDestination in latestFiles:
+			if selectedStorageDestination == currentDestination:
+				allFiles = latestFiles[currentDestination].items()
+				for currentFile in allFiles:
+					# check if file is a "machinecode file" and not a folder or image
+					currentFilePath = currentFile[1]["path"]
+					if not octoprint.filemanager.valid_file_type(currentFilePath, type="machinecode"):
+						self._logger.debug("File '" + currentFilePath + "' is not a machinecode file, not autoprinting")
+						continue
+
+					uploadTime = currentFile[1]["date"]
+					if uploadTime > lastUploadTime:
+						lastUploadTime = uploadTime
+						selectedFilePath = currentFilePath
+						selectedFileName = currentFile[0]
+		if selectedFilePath != None:
+			# okay start countdown
+
+			if selectedStorageDestination == FileDestinations.SDCARD:
+				path = selectedFilePath
+				sd = True
+			else:
+				path = self._file_manager.path_on_disk(selectedStorageDestination, selectedFilePath)
+				sd = False
+
+			# start_new_thread(self.autostartThreadFunction(path, sd,))
+			t = Thread(target=self._autostartPrintThreadFunction, args=(selectedFileName, path, sd,))
+			t.start()
+		else:
+			# no file matching file found
+			self._sendPopupMessageToClient("error", "AutostartPrint: No file selected!",
+										   "Could not found a file on '" + selectedStorageDestination + "'")
+		self._logger.info("!!!CONNECTED-Event DONE")
+
 	######################################################################################### Hooks and public functions
 
 #	def on_startup(self, host, port):
@@ -99,61 +154,28 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def on_event(self, event, payload):
 
-		if (Events.CONNECTED == event and self._settings.get_boolean([SETTINGS_KEY_ACTIVATED])):
-			## start printing
-			self._logger.info("!!!CONNECTED-Event started")
+		# if (Events.CONNECTED == event and self._settings.get_boolean([SETTINGS_KEY_ACTIVATED])):
+		if (self._settings.get_boolean([SETTINGS_KEY_ACTIVATED])):
 
-			# get latest file
-			# check if gcode file
-			# start countdown
-			# -- select
-			# -- print
+			startPrinting = False
+			if (START_TRIGGER_MODE_CONNECTION == self._settings.get([SETTINGS_KEY_START_TRIGGER_MODE])):
+				startPrinting = Events.CONNECTED == event
 
-			selectedFilePath = None
-			selectedFileName = None
-			lastUploadTime = 0
-			latestFiles = self._file_manager.list_files()
-			selectedStorageDestination = self._settings.get([SETTINGS_KEY_FILE_SELECTION_MODE])
-			for currentDestination in latestFiles:
-				if selectedStorageDestination == currentDestination:
-					allFiles = latestFiles[currentDestination].items()
-					for currentFile in allFiles:
-						# check if file is a "machinecode file" and not a folder or image
-						currentFilePath = currentFile[1]["path"]
-						if not octoprint.filemanager.valid_file_type(currentFilePath, type="machinecode"):
-							self._logger.debug("File '" + currentFilePath + "' is not a machinecode file, not autoprinting")
-							continue
+			if (START_TRIGGER_MODE_OPERATIONAL == self._settings.get([SETTINGS_KEY_START_TRIGGER_MODE])):
+				if (Events.PRINTER_STATE_CHANGED == event):
+					operationalStateString = "Operational"  # self._printer.get_state_string(comm.STATE_OPERATIONAL)
+					currentStateString = payload["state_string"]
+					startPrinting = operationalStateString is currentStateString
 
-						uploadTime = currentFile[1]["date"]
-						if uploadTime > lastUploadTime:
-							lastUploadTime = uploadTime
-							selectedFilePath = currentFilePath
-							selectedFileName = currentFile[0]
-
-			if selectedFilePath != None:
-				# okay start countdown
-
-				if selectedStorageDestination == FileDestinations.SDCARD:
-					path = selectedFilePath
-					sd = True
-				else:
-					path = self._file_manager.path_on_disk(selectedStorageDestination, selectedFilePath)
-					sd = False
-
-				#start_new_thread(self.autostartThreadFunction(path, sd,))
-				t = Thread(target=self._autostartPrintThreadFunction, args=(selectedFileName, path, sd,))
-				t.start()
-			else:
-				# no file matching file found
-				self._sendPopupMessageToClient("error","AutostartPrint: No file selected!", "Could not found a file on '"+selectedStorageDestination+"'")
-
-			self._logger.info("!!!CONNECTED-Event DONE")
+			if (startPrinting):
+				self._startAutoStart()
 
 		if (Events.PRINT_DONE == event and self._settings.get_boolean([SETTINGS_KEY_DEACTIVATE_AFTER_SUCCESSFUL])):
 			self._settings.set_boolean([SETTINGS_KEY_ACTIVATED], False)
 			self._settings.save()
 			# could also work eventManager().fire(Events.SETTINGS_UPDATED)
 			self._sendCurrentActivationStateToClient()
+
 
 	def on_settings_save(self, data):
 		# default save function
@@ -190,7 +212,8 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 			activated = False,
 			deactivateAfterSuccessful = True,
 			startPrintDelay = 120,
-			fileSelectionMode = FILE_SELECTION_MODE_SDCARD
+			fileSelectionMode = FILE_SELECTION_MODE_SDCARD,
+			startTriggerMode = START_TRIGGER_MODE_CONNECTION
 		)
 
 	##~~ TemplatePlugin mixin
@@ -237,7 +260,7 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 __plugin_name__ = "AutostartPrint Plugin"
-
+__plugin_pythoncompat__ = ">=2.7,<4"
 
 def __plugin_load__():
 	global __plugin_implementation__

@@ -13,6 +13,19 @@
         </div>
     </div>
 
+    <div class="control-group">
+        <label class="control-label">Trigger for starting:</label>
+        <div class="controls">
+            <label class="radio">
+                <input type="radio" name="startTriggerMode" value="connection" data-bind="checked: pluginSettings.startTriggerMode"> &nbsp;&nbsp;after the printer is connected with OctoPrint
+            </label>
+            <label class="radio">
+                <input type="radio" name="startTriggerMode" value="operational" data-bind="checked: pluginSettings.startTriggerMode"> &nbsp;&nbsp;after the printer is changed to "Operation"-State (could be used for endless printing)<br>
+                <code>THIS IS ALSO DONE AFTER A PRINT IS FINISHED!!!</code>
+            </label>
+        </div>
+    </div>
+
     <div class="control-group" >
         <label class="control-label">Startime delay:</label>
         <div class="controls">

@@ -91,7 +91,6 @@ $(function() {
             }
             // assign event-listener
             self.pluginSettings.activated.subscribe(self.onAutostartPrintActivated, self);
-
         }
 
        // enable support of resetSettings
@@ -101,6 +100,7 @@ $(function() {
                                 self.pluginSettings.deactivateAfterSuccessful(data.deactivateAfterSuccessful);
                                 self.pluginSettings.startPrintDelay(data.startPrintDelay);
                                 self.pluginSettings.fileSelectionMode(data.fileSelectionMode);
+                                self.pluginSettings.startTriggerMode(data.startTriggerMode);
         });
 
 

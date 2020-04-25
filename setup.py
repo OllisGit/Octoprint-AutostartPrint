@@ -14,11 +14,11 @@ plugin_package = "octoprint_AutostartPrint"
 plugin_name = "OctoPrint-AutostartPrint"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "1.1.2"
+plugin_version = "1.2.0"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
-plugin_description = """Autostart a Print after conneting."""
+plugin_description = """Autostart a Print after connecting."""
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
 plugin_author = "OllisGit"
