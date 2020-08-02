@@ -1,7 +1,10 @@
 /**
  *
  */
-function ResetSettingsUtil(){
+function ResetSettingsUtilV2(pluginSettings){
+
+    var self = this;
+    var pluginSettingsFromPlugin = pluginSettings;
 
     var RESET_BUTTON_ID = "resetSettingsButton"
     var RESET_BUTTON_HTML = "<button id='"+RESET_BUTTON_ID+"' class='btn btn-warning' style='margin-right:3%'>Reset Settings</button>"
@@ -52,11 +55,17 @@ function ResetSettingsUtil(){
                         }).done(function( data ){
                             new PNotify({
                                 title: "Default settings saved!",
-                                text: "The plugin-settings were now reseted to default values.<br>Please do a Browser reload (Strg+F5) to update all settings in the UI.",
+                                text: "The plugin settings have now been reset to the default values.<br>Please do a Browser reload (Strg + F5) to update all settings in the UI.",
                                 type: "info",
                                 hide: true
                             });
-
+                            // reset all values
+                            for(var propName in data){
+                                propValue = data[propName];
+                                console.log(propName + ': ' + propValue);
+                                pluginSettingsFromPlugin[propName](propValue);
+                            }
+                            // delegae to the client. So lient is able to reset/init other values
                             mapSettingsToViewModel_function(data);
                         });
                     });

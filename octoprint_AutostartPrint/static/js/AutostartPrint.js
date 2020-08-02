@@ -80,6 +80,11 @@ $(function() {
             // assign current pluginSettings
             self.pluginSettings = self.settingsViewModel.settings.plugins[PLUGIN_ID];
 
+            // resetSettings-Stuff
+            new ResetSettingsUtilV2(self.pluginSettings).assignResetSettingsFeature(PLUGIN_ID, function(data){
+                // no additional reset function needed in V2
+            });
+
             self.onAutostartPrintActivated = function() {
                 var isActivated = self.pluginSettings.activated()
                 $.ajax({
@@ -92,17 +97,6 @@ $(function() {
             // assign event-listener
             self.pluginSettings.activated.subscribe(self.onAutostartPrintActivated, self);
         }
-
-       // enable support of resetSettings
-        new ResetSettingsUtil().assignResetSettingsFeature(PLUGIN_ID, function(data){
-                                // assign default settings-values
-                                self.pluginSettings.activated(data.activated);
-                                self.pluginSettings.deactivateAfterSuccessful(data.deactivateAfterSuccessful);
-                                self.pluginSettings.startPrintDelay(data.startPrintDelay);
-                                self.pluginSettings.fileSelectionMode(data.fileSelectionMode);
-                                self.pluginSettings.startTriggerMode(data.startTriggerMode);
-        });
-
 
         self.countdownCircle = null;
         // receive data from server

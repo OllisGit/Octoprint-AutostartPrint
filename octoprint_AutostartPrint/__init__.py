@@ -20,6 +20,7 @@ SETTINGS_KEY_DEACTIVATE_AFTER_SUCCESSFUL = "deactivateAfterSuccessful"
 SETTINGS_KEY_START_PRINT_DELAY = "startPrintDelay"
 SETTINGS_KEY_FILE_SELECTION_MODE = "fileSelectionMode"
 SETTINGS_KEY_START_TRIGGER_MODE = "startTriggerMode"
+SETTINGS_KEY_INCLUDE_SUB_FOLDERS = "includeSubFolders"
 
 
 FILE_SELECTION_MODE_SDCARD = FileDestinations.SDCARD
@@ -107,26 +108,19 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 		# -- print
 		selectedFilePath = None
 		selectedFileName = None
-		lastUploadTime = 0
-		latestFiles = self._file_manager.list_files()
+		selectedFilePathDict = None
+		latestFiles = self._file_manager.list_files(recursive=True)
 		selectedStorageDestination = self._settings.get([SETTINGS_KEY_FILE_SELECTION_MODE])
 		for currentDestination in latestFiles:
 			if selectedStorageDestination == currentDestination:
 				allFiles = latestFiles[currentDestination].items()
-				for currentFile in allFiles:
-					# check if file is a "machinecode file" and not a folder or image
-					currentFilePath = currentFile[1]["path"]
-					if not octoprint.filemanager.valid_file_type(currentFilePath, type="machinecode"):
-						self._logger.debug("File '" + currentFilePath + "' is not a machinecode file, not autoprinting")
-						continue
 
-					uploadTime = currentFile[1]["date"]
-					if uploadTime > lastUploadTime:
-						lastUploadTime = uploadTime
-						selectedFilePath = currentFilePath
-						selectedFileName = currentFile[0]
-		if selectedFilePath != None:
+				selectedFilePathDict = self._findLatestUploadedFile(allFiles, None)
+
+		if selectedFilePathDict != None:
 			# okay start countdown
+			selectedFilePath = selectedFilePathDict["filePath"]
+			selectedFileName = selectedFilePathDict["fileName"]
 
 			if selectedStorageDestination == FileDestinations.SDCARD:
 				path = selectedFilePath
@@ -143,6 +137,46 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 			self._sendPopupMessageToClient("error", "AutostartPrint: No file selected!",
 										   "Could not found a file on '" + selectedStorageDestination + "'")
 		self._logger.info("!!!CONNECTED-Event DONE")
+
+	def _findLatestUploadedFile(self, allFiles, latestResult):
+		result = None
+		for currentFile in allFiles:
+			# check if file is a "machinecode file" and not a folder or image
+			currentFilePath = currentFile[1]["path"]
+
+			if not octoprint.filemanager.valid_file_type(currentFilePath, type="machinecode"):
+				includeSubFolders = self._settings.get_boolean([SETTINGS_KEY_INCLUDE_SUB_FOLDERS])
+				if (currentFile[1]["type"] == "folder" and includeSubFolders == True):
+					if ("children" in currentFile[1]):
+						allSubFiles = currentFile[1]["children"].items()
+						latestResult = self._findLatestUploadedFile(allSubFiles, latestResult)
+						# skip folder, next file
+						continue
+				else:
+					if not octoprint.filemanager.valid_file_type(currentFilePath, type="machinecode"):
+						continue
+
+			# gcode present
+			latestUploadTime = 0
+			if (latestResult != None):
+				latestUploadTime = latestResult["uploadTime"]
+
+			uploadTime = currentFile[1]["date"]
+
+			if uploadTime > latestUploadTime:
+
+				selectedFilePath = currentFilePath
+				selectedFileName = currentFile[0]
+
+				latestResult = dict(
+					filePath = selectedFilePath,
+					fileName = selectedFileName,
+					uploadTime = uploadTime
+				)
+
+		return latestResult
+
+
 
 	######################################################################################### Hooks and public functions
 
@@ -165,7 +199,10 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 				if (Events.PRINTER_STATE_CHANGED == event):
 					operationalStateString = "Operational"  # self._printer.get_state_string(comm.STATE_OPERATIONAL)
 					currentStateString = payload["state_string"]
-					startPrinting = operationalStateString is currentStateString
+					startPrinting = operationalStateString == currentStateString
+					if (self._printer.is_printing()):
+						# Already printing
+						startPrinting=False
 
 			if (startPrinting):
 				self._startAutoStart()
@@ -213,7 +250,8 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 			deactivateAfterSuccessful = True,
 			startPrintDelay = 120,
 			fileSelectionMode = FILE_SELECTION_MODE_SDCARD,
-			startTriggerMode = START_TRIGGER_MODE_CONNECTION
+			startTriggerMode = START_TRIGGER_MODE_CONNECTION,
+			includeSubFolders = False
 		)
 
 	##~~ TemplatePlugin mixin
@@ -229,7 +267,7 @@ class AutostartPrintPlugin(octoprint.plugin.SettingsPlugin,
 		return dict(
 			js=["js/circle-progress.min.js",
 				"js/AutostartPrint.js",
-				"js/ResetSettingsUtil.js"],
+				"js/ResetSettingsUtilV2.js"],
 			css=["css/AutostartPrint.css"],
 			less=["less/AutostartPrint.less"]
 		)
